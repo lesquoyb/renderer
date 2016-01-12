@@ -190,7 +190,7 @@ int main(int argc, char** argv) {
 
     VertexSwarm v("obj/african_head.obj");
 
-    TGAImage* i = v.generateImage(600, 800);
+    TGAImage* i = v.generateImage(800, 800);
 
     i->write_tga_file("output.tga");
 
