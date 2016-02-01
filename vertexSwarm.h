@@ -1,6 +1,7 @@
 #ifndef VERTEXSWARM_H
 #define VERTEXSWARM_H
 
+#include <climits>
 #include "vertex.h"
 #include "triangle.h"
 
@@ -13,7 +14,10 @@ public:
     vector<Triangle> trigs;
 
     VertexSwarm(string file){
-
+		
+		
+		Vertex sun(0, 0, 1);
+		
 		std::ifstream is(file.c_str(), std::ios_base::in);
         string str, lol;
         while(getline(is, str)){
@@ -31,7 +35,7 @@ public:
 				x-=1;
 				y-=1;
 				z-=1;   
-				trigs.push_back(Triangle(swarm[x], swarm[y], swarm[z]));
+				trigs.push_back(Triangle(swarm[x], swarm[y], swarm[z], sun));
             }
 		}
 
@@ -48,12 +52,12 @@ public:
 		 for(auto v : swarm){
             v->normalize(realW, realH);
         }
-	
+
 		for(Triangle t : trigs){
 			//line( t.v1->x, t.v1->y, t.v2->x, t.v2->y, *img, red);
             //line( t.v1->x, t.v1->y, t.v3->x, t.v3->y, *img, red);
             //line( t.v3->x, t.v3->y, t.v2->x, t.v2->y, *img, red);
-			t.barycentre(*img,red, realW, realH);
+			t.barycentre(*img,white, realW, realH);
         }
 	    
 		img->flip_vertically();

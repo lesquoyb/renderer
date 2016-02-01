@@ -1,5 +1,9 @@
 #ifndef VERTEX_H
 #define VERTEX_H
+
+#include <cmath>
+
+
 class Vertex{
 
 public:
@@ -14,9 +18,16 @@ public:
 		y *= width;
      }
 
+	float angle(const Vertex &v)const{
+		return acos( 
+			(x*v.x + y*v.y + z*v.z)
+			/ ( sqrt(x*x + y*y + z*z) * sqrt(v.x*v.x + v.y*v.y + v.z*v.z) ) 
+		);
+	}
 
-
-
+	Vertex operator*(const Vertex &v)const{
+		return Vertex(x * v.x, y * v.y, z * v.y);
+	}
 
 
 };

@@ -23,10 +23,12 @@ class Triangle{
 public:
 
     Vertex* v1,* v2,* v3;
+	double luminosity;
 
-    Triangle(Vertex* x1, Vertex* x2, Vertex* x3):
-        v1(x1),v2(x2),v3(x3)
+    Triangle(Vertex* x1, Vertex* x2, Vertex* x3, const Vertex &light):
+        v1(x1),v2(x2),v3(x3), luminosity(light.angle(*v1 * (*v2)))
 		{
+		
 		}
 
 
@@ -46,13 +48,17 @@ public:
 		int xMax, yMax;
 		int xMin = min(min(v1->x, v2->x), v3->x);  
 		int yMin = min(min(v1->y, v2->y), v3->y);
-
+ //	 	cout << luminosity << endl;
 		xMax = max(max(v1->x, v2->x), v3->x);
 		yMax = max(max(v1->y, v2->y), v3->y);
+		TGAColor tColor((int) (c.r * luminosity),
+						(int) (c.g * luminosity),
+						(int) (c.b * luminosity),
+						luminosity);
 		for( ;xMin <= xMax ; xMin++){
 			for( int y = yMin; y <= yMax ; y++){
 				if( isInTriangle(xMin, y)){
-					img.set(xMin, y, white);
+					img.set(xMin, y, tColor);
 				}
 			}
 		}
