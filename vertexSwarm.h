@@ -21,35 +21,35 @@ public:
 		
 		
 		
-		std::ifstream is(file.c_str(), std::ios_base::in);
+        std::ifstream is(file.c_str(), std::ios_base::in);
         string str, lol;
         while(getline(is, str)){
-			
-			std::istringstream iss(str.c_str());
-			iss >> str;	
-			if(strcmp(str.c_str(),"v") == 0 && str.size() == 1){
-            	float x, y , z;
-			    iss  >>  x >> y >> z;
-				swarm.push_back(new Vertex(x, y, z));
-            }
-			else if(strcmp(str.c_str(),"vt") == 0 && str.size() == 2){
-				float x, y, z;
-				iss >> x >> y >> z;
-				textures.push_back(new Vertex(x,y,z));
 
-			}
-			else if(strcmp(str.c_str(), "f") == 0  && str.size() == 1){
-            	int x, y, z, tx, ty , tz;
-				char slash;
-                iss  >> x >> slash >> tx >> lol >>  y >> slash >> ty >> lol >> z >> slash >> tz >> lol;	
-				x--;
-				y--;
-				z--; 
-				tx--;ty--;tz--;
-				trigs.push_back(Triangle(swarm[x], swarm[y], swarm[z]));
+            std::istringstream iss(str.c_str());
+            iss >> str;
+            if(strcmp(str.c_str(),"v") == 0 && str.size() == 1){
+                float x, y , z;
+                iss  >>  x >> y >> z;
+                swarm.push_back(new Vertex(x, y, z));
+            }
+            else if(strcmp(str.c_str(),"vt") == 0 && str.size() == 2){
+                float x, y, z;
+                iss >> x >> y >> z;
+                textures.push_back(new Vertex(x,y,z));
+
+            }
+            else if(strcmp(str.c_str(), "f") == 0  && str.size() == 1){
+                int x, y, z, tx, ty , tz;
+                char slash;
+                iss  >> x >> slash >> tx >> lol >>  y >> slash >> ty >> lol >> z >> slash >> tz >> lol;
+                x--;
+                y--;
+                z--;
+                tx--;ty--;tz--;
+                trigs.push_back(Triangle(swarm[x], swarm[y], swarm[z]));
                 trigTextures.push_back(Triangle(textures[tx],textures[ty], textures[tz]));
             }
-		}
+        }
 
     }
 
@@ -72,7 +72,7 @@ public:
             v->normalize(realW, realH);
         }
 		
-		Vertex sun(0, 0, 1);
+        Vertex sun(0.3, 0, 0.7);
 			
         for(int i = 0 ; i < trigs.size() ; i++){
             Triangle t = trigs[i];

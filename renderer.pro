@@ -12,4 +12,5 @@ HEADERS += \
     tools.h \
     triangle.h \
     vertex.h \
-    vertexSwarm.h
+    vertexSwarm.h \
+    matrix4.h

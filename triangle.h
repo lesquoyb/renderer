@@ -7,13 +7,15 @@ using namespace std;
 
 class vect2{
 	public:
-		float x, y;
-		vect2(const float &x, const float &y): x(x), y(y) {}
-		vect2(const vect2 &a, const vect2 &b){
-			x = max(a.x, b.x) - min(a.x, b.x);
-			y = max(a.y, b.y) - min(a.y, b.y);
-		}
-		vect2(const Vertex &i): x(i.x), y(i.y){}
+        double x, y;
+
+        vect2():vect2(0,0){}
+        vect2(const float &x, const float &y): x(x), y(y) {}
+        vect2(const vect2 &a, const vect2 &b){
+            x = max(a.x, b.x) - min(a.x, b.x);
+            y = max(a.y, b.y) - min(a.y, b.y);
+        }
+        vect2(const Vertex &i): x(i.x), y(i.y){}
 		
 };
 
