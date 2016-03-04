@@ -38,6 +38,61 @@ public:
                     {0,0,0,0},
                     {0,0,0,0}}{}
 
+
+    Matrix4 operator*(Matrix4& m)const{
+        Matrix4 ret;
+        for(int i = 0 ; i < 4 ; i++){
+            for(int j = 0 ; j < 4 ; j++){
+                ret[i][j] += data[i][j] * m[j][i];//TODO: vérifier, c'est trop beau pour être vrai
+            }
+        }
+        return ret;
+    }
+
+    Vertex operator*(const Vertex &v)const{
+        double returnValues[4];
+        for(int i = 0 ; i < 4 ; i++){
+            returnValues[i] = data[i][0] * v.x + data[i][1] * v.y + data[i][2] * v.z + data[i][3];
+        }
+        //passage en 3D
+        return Vertex(  returnValues[0]/returnValues[3],
+                        returnValues[1]/returnValues[3],
+                        returnValues[2]/returnValues[3]);
+    }
+
+    double* operator[](const int &index){
+        return data[index];
+    }
+
+
+    static Matrix4 lookat(const Vertex &eye,const  Vertex &center, const Vertex &up) {
+        Vertex z = (eye - center).normalized();
+        Vertex x = up.cross(z).normalized();
+        Vertex y = z.cross( x).normalized();
+        Matrix4 Minv = Matrix4::identity();
+        Matrix4 Tr   = Matrix4::identity();
+        for (int i=0; i<3; i++) {
+            Minv[0][i] = x[i];
+            Minv[1][i] = y[i];
+            Minv[2][i] = z[i];
+            Tr[i][3] = - center[i];
+        }
+        return Minv*Tr;
+    }
+
+    static Matrix4 viewport(int x, int y,int depth, int w, int h) {
+        Matrix4 m = Matrix4::identity();
+        m[0][3] = x+w/2.f;
+        m[1][3] = y+h/2.f;
+        m[2][3] = depth/2.f;
+
+        m[0][0] = w/2.f;
+        m[1][1] = h/2.f;
+        m[2][2] = depth/2.f;
+        return m;
+    }
+
+
     static Matrix4 identity(){
         Matrix4 m;
         for(int i = 0 ; i < 4 ; i++)
@@ -54,16 +109,6 @@ public:
         return m;
     }
 
-    Vertex operator*(const Vertex &v)const{
-        double returnValues[4];
-        for(int i = 0 ; i < 4 ; i++){
-            returnValues[i] = data[i][0] * v.x + data[i][1] * v.y + data[i][2] * v.z + data[i][3];
-        }
-        //passage en 3D
-        return Vertex(  returnValues[0]/returnValues[3],
-                        returnValues[1]/returnValues[3],
-                        returnValues[2]/returnValues[3]);
-    }
 
 };
 

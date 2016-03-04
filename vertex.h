@@ -10,7 +10,7 @@ class Vertex{
 
 public:
 
-	float x, y, z;
+    float x, y, z;
 
     Vertex():Vertex(0,0,0) {}
 
@@ -26,9 +26,10 @@ public:
             x++;
             y++;
             z++;
-            x *= width;
+          /*  x *= width;
             y *= width;
             z *= width;//TODO: ça n'a aucun sens :) mais ça ne marche pas autrement ... question de proportions, toussa toussa
+            */
      }
 
 	 double norm()const{
@@ -36,9 +37,9 @@ public:
 	 }
 
 	Vertex cross(const Vertex &v)const{
-		return Vertex(	y*v.z - z*v.y,
-						z*v.x - x*v.z, 
-						x*v.y - y*v.x);
+        return Vertex(      y*v.z - z*v.y,
+                            z*v.x - x*v.z,
+                            x*v.y - y*v.x);
 	}
 	Vertex operator-(const Vertex &v)const{
 		return Vertex(x -v.x, y - v.y, z - v.z);
@@ -51,6 +52,12 @@ public:
 	double operator *(const Vertex &v) const { 
 		return x*v.x + y*v.y + z*v.z; 
 	}
+
+    float operator[](const int &index)const{
+        return (index == 0) ? x : (index == 1) ? y : z;
+    }
+
+
 };
 
 

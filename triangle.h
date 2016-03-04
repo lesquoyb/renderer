@@ -52,16 +52,17 @@ public:
 
     void draw(TGAImage &img, const Triangle &texture, const TGAImage &textureImg ,float** zBuffer,const Vertex& light_source ) const{
 		
-		//get the bounding box
-		int xMin = min(min(v1->x, v2->x), v3->x);  
-		int yMin = min(min(v1->y, v2->y), v3->y);
-		int xMax = max(max(v1->x, v2->x), v3->x);
-		int yMax = max(max(v1->y, v2->y), v3->y);
+        //get the bounding box
+        int xMin = min(min(v1->x, v2->x), v3->x);
+        int yMin = min(min(v1->y, v2->y), v3->y);
+        int xMax = max(max(v1->x, v2->x), v3->x);
+        int yMax = max(max(v1->y, v2->y), v3->y);
         float lumiere;
 
-		Vertex light_vector = (*v1 - *v3).cross(*v2 - *v3);
+        Vertex light_vector = (*v1 - *v3).cross(*v2 - *v3);
         light_vector = light_vector.normalized();
-
+        cout << xMin << " " << yMin << " " << xMax << " " << yMax << endl;
+        if(xMin >= 0 and yMin>=0 and xMax<= textureImg.get_width() and yMax <= textureImg.get_height())
         for( int x = xMin; x <= xMax ; x++){
 			for( int y = yMin; y <= yMax ; y++){
 				Vertex center = barycentre(x, y);
