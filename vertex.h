@@ -54,8 +54,8 @@ public:
 		return Vertex(x*i, y*i, z*i);
 	}
 
-	double operator *(const Vertex &v) const { 
-		return x*v.x + y*v.y + z*v.z; 
+    Vertex operator *(const Vertex &v) const {
+        return Vertex(x*v.x,   y*v.y , z*v.z);
 	}
 
     float operator[](const int &index)const{

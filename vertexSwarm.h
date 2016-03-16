@@ -62,7 +62,7 @@ public:
     }
 
 
-    TGAImage* generateImage(int width, int height, const TGAImage& textureImg, int wOffset = 0, int hOffset = 0 ) const{
+    TGAImage* generateImage(int width, int height, const TGAImage& textureImg, const TGAImage & normal_map, int wOffset = 0, int hOffset = 0 ) const{
 
         TGAImage* img = new TGAImage(width,height,TGAImage::RGB);
 
@@ -102,7 +102,7 @@ public:
             Vertex  screen_coord1 = pipeline * *trigs[i].v1 ,
                     screen_coord2 = pipeline * *trigs[i].v2 ,
                     screen_coord3 = pipeline * *trigs[i].v3 ;
-            Triangle(&screen_coord1, &screen_coord2, &screen_coord3).draw(*img, trigTextures[i], textureImg, zBuffer, light, normalTrigs[i], sun );
+            Triangle(&screen_coord1, &screen_coord2, &screen_coord3).draw(*img, trigTextures[i], textureImg, normal_map, zBuffer, normalTrigs[i], sun );
 
       }
 

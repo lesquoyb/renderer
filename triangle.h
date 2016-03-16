@@ -50,7 +50,7 @@ public:
 
 
 
-    void draw(TGAImage &img, const Triangle &texture, const TGAImage &textureImg ,float** zBuffer,const float &light, const Triangle &normals, const Vertex &light_source) const{
+    void draw(TGAImage &img, const Triangle &texture, const TGAImage &textureImg,const TGAImage &normal_map ,float** zBuffer, const Triangle &normals, const Vertex &light_source) const{
 		
         //get the bounding box
         int xMin = min(min(v1->x, v2->x), v3->x);
@@ -79,16 +79,19 @@ public:
                                     +  texture.v3->y * center.z;
 
 
-                        TGAColor c = textureImg.get( vx * textureImg.get_width(), vy * textureImg.get_height());
+                        TGAColor texture_color = textureImg.get( vx * textureImg.get_width(), vy * textureImg.get_height());
+                        TGAColor normal_color(normal_map.get(vx * normal_map.get_width(), vy * normal_map.get_height()));
+                        Vertex n_map = Vertex(normal_color.b, normal_color.r, normal_color.g).normalized();
+                        Vertex n_gouraud = (*normals.v1 * center.x + *normals.v2 * center.y + *normals.v3 * center.z).normalized();
 
-                        Vertex normal = *normals.v1 * center.x + *normals.v2 * center.y + *normals.v3 * center.z ;
+                        float gouraud_light = n_gouraud.x * light_source.x + n_gouraud.y * light_source.y + n_gouraud.z * light_source.z;
+                        float n_light = n_map.x * light_source.x + n_map.y * light_source.y + n_map.z * light_source.z;
 
-                        float gouraud = normal.normalized() * light_source;
-
-                        TGAColor tColor(max( min( (int) (c.r * gouraud), 255), 0),
-                                        max(  min( (int) (c.g * gouraud), 255), 0),
-                                        max(  min( (int) (c.b * gouraud), 255), 0),
-                                                          c.a);
+                        float light = gouraud_light + n_light;
+                        TGAColor tColor(max( min( (int)  (texture_color.r * light), 255), 0),
+                                        max(  min( (int) (texture_color.g * light), 255), 0),
+                                        max(  min( (int) (texture_color.b * light), 255), 0),
+                                                          texture_color.a);
                         img.set(x, y, tColor);
                         zBuffer[x][y] = z_interpolation;
 					}
