@@ -50,46 +50,47 @@ public:
 
 
 
-    void draw(TGAImage &img, const Triangle &texture, const TGAImage &textureImg ,float** zBuffer,const Vertex& light_source ) const{
+    void draw(TGAImage &img, const Triangle &texture, const TGAImage &textureImg ,float** zBuffer,const float &light, const Triangle &normals, const Vertex &light_source) const{
 		
         //get the bounding box
         int xMin = min(min(v1->x, v2->x), v3->x);
         int yMin = min(min(v1->y, v2->y), v3->y);
         int xMax = max(max(v1->x, v2->x), v3->x);
         int yMax = max(max(v1->y, v2->y), v3->y);
-        float lumiere;
 
-        Vertex light_vector = (*v1 - *v3).cross(*v2 - *v3);
-        light_vector = light_vector.normalized();
-        cout << xMin << " " << yMin << " " << xMax << " " << yMax << endl;
         if(xMin >= 0 and yMin>=0 and xMax<= textureImg.get_width() and yMax <= textureImg.get_height())
         for( int x = xMin; x <= xMax ; x++){
-			for( int y = yMin; y <= yMax ; y++){
-				Vertex center = barycentre(x, y);
-		    	if(center.x >= 0 and center.y >= 0 and center.z >= 0){
+            for( int y = yMin; y <= yMax ; y++){
 
-					float Pz = 	  v1->z * center.x 
-								+ v2->z * center.y 
-								+ v3->z * center.z;
-                    if(zBuffer[x][y] < Pz){
-                        double vx =     texture.v1->x * center.x
+                Vertex center = barycentre(x, y);
+
+                if(center.x >= 0 and center.y >= 0 and center.z >= 0){
+
+                    float z_interpolation =   v1->z * center.x
+                                            + v2->z * center.y
+                                            + v3->z * center.z;
+                    if(zBuffer[x][y] < z_interpolation){
+
+                        double vx =    texture.v1->x * center.x
                                     +  texture.v2->x * center.y
                                     +  texture.v3->x * center.z;
                         double vy =    texture.v1->y * center.x
                                     +  texture.v2->y * center.y
                                     +  texture.v3->y * center.z;
+
+
                         TGAColor c = textureImg.get( vx * textureImg.get_width(), vy * textureImg.get_height());
 
-                        lumiere = abs(  light_source.x*light_vector.x
-                                      + light_source.y*light_vector.y
-                                      + light_source.z*light_vector.z);
+                        Vertex normal = *normals.v1 * center.x + *normals.v2 * center.y + *normals.v3 * center.z ;
 
-                        TGAColor tColor( (int) (c.r * lumiere),
-                                         (int) (c.g * lumiere),
-                                         (int) (c.b * lumiere),
+                        float gouraud = normal.normalized() * light_source;
+
+                        TGAColor tColor(max( min( (int) (c.r * gouraud), 255), 0),
+                                        max(  min( (int) (c.g * gouraud), 255), 0),
+                                        max(  min( (int) (c.b * gouraud), 255), 0),
                                                           c.a);
-						img.set(x, y, tColor);
-						zBuffer[x][y] = Pz;
+                        img.set(x, y, tColor);
+                        zBuffer[x][y] = z_interpolation;
 					}
 				}
 			}

@@ -4,6 +4,8 @@
 #include "triangle.h"
 #include <cmath>
 
+enum Axis{X = 1, Y = 2, Z = 3};
+
 class Matrix2{
 
 public:
@@ -43,7 +45,10 @@ public:
         Matrix4 ret;
         for(int i = 0 ; i < 4 ; i++){
             for(int j = 0 ; j < 4 ; j++){
-                ret[i][j] += data[i][j] * m[j][i];//TODO: vérifier, c'est trop beau pour être vrai
+
+                ret[i][j] = 0;
+                for(int k = 0 ; k < 4 ; k++)
+                ret[i][j] += data[i][k] * m[k][j];//TODO: vérifier, c'est trop beau pour être vrai
             }
         }
         return ret;
@@ -82,8 +87,8 @@ public:
 
     static Matrix4 viewport(int x, int y,int depth, int w, int h) {
         Matrix4 m = Matrix4::identity();
-        m[0][3] = x+w/2.f;
-        m[1][3] = y+h/2.f;
+        m[0][3] = x + w/2.f;
+        m[1][3] = y + h/2.f;
         m[2][3] = depth/2.f;
 
         m[0][0] = w/2.f;
@@ -100,17 +105,23 @@ public:
         return m;
     }
 
-    static Matrix4 rotationMatrix(const double &alpha){
-        Matrix4 m = identity();//TODO: vérifier
-        m.data[0][0] = cos(alpha);
-        m.data[0][1] = -sin(alpha);
-        m.data[1][0] = sin(alpha);
-        m.data[1][1] = cos(alpha);
+
+    static Matrix4 rotationMatrix(const double &alpha){//, const Axis& axis = Axis::X){
+        Matrix4 m = identity();
+        m[0][0] =  cos(alpha);
+        m[0][2] = -sin(alpha);
+        m[2][0] =  sin(alpha);
+        m[2][2] =  cos(alpha);
         return m;
     }
 
 
 };
+
+ostream& operator<<(ostream & s, const Matrix4 &m){
+
+}
+
 
 
 #endif // MATRIX4_H

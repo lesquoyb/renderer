@@ -26,6 +26,6 @@ TGAImage* generate(const string &file_path){
     TGAImage texture;
     texture.read_tga_file(( file_path + "_diffuse.tga").c_str());
     texture.flip_vertically();
-    return v.generateImage(texture.get_width(), texture.get_height(), texture);
+    return v.generateImage(1000, 1000, texture);
 
 }

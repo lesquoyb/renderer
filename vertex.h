@@ -3,7 +3,10 @@
 
 #include <cmath>
 #include <iostream>
+#include <ostream>
+#include <sstream>
 
+using std::ostream;
 
 const double PI = 3.1415926535;
 class Vertex{
@@ -44,7 +47,9 @@ public:
 	Vertex operator-(const Vertex &v)const{
 		return Vertex(x -v.x, y - v.y, z - v.z);
 	}
-
+    Vertex operator+(const Vertex &v)const{
+        return Vertex(x + v.x, y + v.y, z + v.z);
+    }
 	Vertex operator*(const double &i)const{
 		return Vertex(x*i, y*i, z*i);
 	}
@@ -61,6 +66,9 @@ public:
 };
 
 
+ostream& operator<<(ostream & s, const Vertex & v){
+    return s << v.x <<" " << v.y << " " << v.z;
+}
 
 
 
