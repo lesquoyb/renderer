@@ -82,7 +82,7 @@ public:
             Minv[2][i] = z[i];
             Tr[i][3] = - center[i];
         }
-        return Minv*Tr;
+        return Minv * Tr;
     }
 
     static Matrix4 viewport(int x, int y,int depth, int w, int h) {
@@ -106,7 +106,8 @@ public:
     }
 
 
-    static Matrix4 rotationMatrix(const double &alpha){//, const Axis& axis = Axis::X){
+    static Matrix4 rotationMatrix(const double &alpha, const Axis &axis = Y){//, const Axis& axis = Axis::X){
+
         Matrix4 m = identity();
         m[0][0] =  cos(alpha);
         m[0][2] = -sin(alpha);
@@ -115,13 +116,16 @@ public:
         return m;
     }
 
-
 };
 
-ostream& operator<<(ostream & s, const Matrix4 &m){
-
+ostream& operator<<(ostream & s, Matrix4 &m){
+    for(int i = 0 ; i < 4 ; i++){
+        for(int j = 0 ; j < 4 ; j++){
+            s << m[i][j] << " ";
+        }
+        s << endl;
+    }
+    return s;
 }
-
-
 
 #endif // MATRIX4_H

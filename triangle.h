@@ -50,7 +50,7 @@ public:
 
 
 
-    void draw(TGAImage &img, const Triangle &texture, const TGAImage &textureImg,const TGAImage &normal_map ,float** zBuffer, const Triangle &normals, const Vertex &light_source) const{
+    void draw(TGAImage &img, const Triangle &texture, const TGAImage &textureImg,const TGAImage &normal_map, const TGAImage &specular_map ,float** zBuffer, const Triangle &normals, const Vertex &light_source) const{
 		
         //get the bounding box
         int xMin = min(min(v1->x, v2->x), v3->x);
@@ -58,46 +58,54 @@ public:
         int xMax = max(max(v1->x, v2->x), v3->x);
         int yMax = max(max(v1->y, v2->y), v3->y);
 
-        if(xMin >= 0 and yMin>=0 and xMax<= textureImg.get_width() and yMax <= textureImg.get_height())
-        for( int x = xMin; x <= xMax ; x++){
-            for( int y = yMin; y <= yMax ; y++){
+        if( xMin >= 0 and yMin >= 0 and xMax <= textureImg.get_width() and yMax <= textureImg.get_height() )//si tout le triangle est dans l'image, sinon flemme de faire un découpage propre
+            for( int x = xMin; x <= xMax ; x++ ){
+                for( int y = yMin; y <= yMax ; y++ ){
 
-                Vertex center = barycentre(x, y);
+                    Vertex center = barycentre(x, y);
 
-                if(center.x >= 0 and center.y >= 0 and center.z >= 0){
+                    if(center.x >= 0 and center.y >= 0 and center.z >= 0){
 
-                    float z_interpolation =   v1->z * center.x
-                                            + v2->z * center.y
-                                            + v3->z * center.z;
-                    if(zBuffer[x][y] < z_interpolation){
+                        float z_interpolation =   v1->z * center.x
+                                                + v2->z * center.y
+                                                + v3->z * center.z;
 
-                        double vx =    texture.v1->x * center.x
-                                    +  texture.v2->x * center.y
-                                    +  texture.v3->x * center.z;
-                        double vy =    texture.v1->y * center.x
-                                    +  texture.v2->y * center.y
-                                    +  texture.v3->y * center.z;
+                        if(zBuffer[x][y] < z_interpolation){
+
+                            double vx =    texture.v1->x * center.x
+                                        +  texture.v2->x * center.y
+                                        +  texture.v3->x * center.z;
+                            double vy =    texture.v1->y * center.x
+                                        +  texture.v2->y * center.y
+                                        +  texture.v3->y * center.z;
+
+                            TGAColor texture_color = textureImg.get( vx * textureImg.get_width(), vy * textureImg.get_height() );
+                            TGAColor normal_color  = normal_map.get( vx * normal_map.get_width(), vy * normal_map.get_height() );
+
+                            Vertex n_map = Vertex( normal_color.b, normal_color.r, normal_color.g ).normalized();
+                            Vertex n_gouraud = (*normals.v1 * center.x + *normals.v2 * center.y + *normals.v3 * center.z).normalized();
+                            Vertex r =  ( n_map * 2 * (n_map.cross(light_source)) - light_source).normalized();
+
+                            Vertex n_spe(0, 0, 0);
+//TODO: ambient_light = gouraud shading ?
+                            float ambient_light =0;// n_gouraud.x * light_source.x + n_gouraud.y * light_source.y + n_gouraud.z * light_source.z;
+                            float n_light       =     n_map.x * light_source.x +     n_map.y * light_source.y +     n_map.z * light_source.z;
+                            float specular_light= pow( max(r.z, 0.0f), specular_map.get(vx,vy).r);
 
 
-                        TGAColor texture_color = textureImg.get( vx * textureImg.get_width(), vy * textureImg.get_height());
-                        TGAColor normal_color(normal_map.get(vx * normal_map.get_width(), vy * normal_map.get_height()));
-                        Vertex n_map = Vertex(normal_color.b, normal_color.r, normal_color.g).normalized();
-                        Vertex n_gouraud = (*normals.v1 * center.x + *normals.v2 * center.y + *normals.v3 * center.z).normalized();
 
-                        float gouraud_light = n_gouraud.x * light_source.x + n_gouraud.y * light_source.y + n_gouraud.z * light_source.z;
-                        float n_light = n_map.x * light_source.x + n_map.y * light_source.y + n_map.z * light_source.z;
+                            float light = ambient_light + n_light + specular_light;
 
-                        float light = gouraud_light + n_light;
-                        TGAColor tColor(max( min( (int)  (texture_color.r * light), 255), 0),
-                                        max(  min( (int) (texture_color.g * light), 255), 0),
-                                        max(  min( (int) (texture_color.b * light), 255), 0),
-                                                          texture_color.a);
-                        img.set(x, y, tColor);
-                        zBuffer[x][y] = z_interpolation;
-					}
-				}
-			}
-		}
+                            TGAColor tColor(max(  min( (int) (texture_color.r * light), 255), 0),
+                                            max(  min( (int) (texture_color.g * light), 255), 0),
+                                            max(  min( (int) (texture_color.b * light), 255), 0),
+                                                              texture_color.a);
+                            img.set(x, y, tColor);
+                            zBuffer[x][y] = z_interpolation;
+                        }
+                    }
+                }
+            }
 
 	}
 

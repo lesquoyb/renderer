@@ -62,7 +62,7 @@ public:
     }
 
 
-    TGAImage* generateImage(int width, int height, const TGAImage& textureImg, const TGAImage & normal_map, int wOffset = 0, int hOffset = 0 ) const{
+    TGAImage* generateImage(int width, int height, const TGAImage& textureImg, const TGAImage & normal_map, const TGAImage &specular_map,int wOffset = 0, int hOffset = 0 ) const{
 
         TGAImage* img = new TGAImage(width,height,TGAImage::RGB);
 
@@ -84,25 +84,18 @@ public:
         projection[3][2] = -1.f/(eye-center).norm();
 
 
-        Matrix4 viewport   = Matrix4::viewport(0, 0, 255, width, height);
-        Matrix4 rotation = Matrix4::rotationMatrix( 1 * PI/180);
+        Matrix4 viewport = Matrix4::viewport(0, 0, 255, width, height);
+        Matrix4 rotation = Matrix4::rotationMatrix( 40 * PI/180);
         Matrix4 pipeline = viewport * rotation ; //* modelView ;
 
 
         for(int i = 0 ; i < trigs.size() ; i++){
 
-            Vertex light_vector = (*trigs[i].v1 - *trigs[i].v3).cross(*trigs[i].v2 - *trigs[i].v3);
-
-            light_vector = light_vector.normalized();
-            float intensity = 0.4;
-            float light =  max(intensity + sun.x * light_vector.x
-                          + sun.y * light_vector.y
-                          + sun.z * light_vector.z, 0.f);
-
             Vertex  screen_coord1 = pipeline * *trigs[i].v1 ,
                     screen_coord2 = pipeline * *trigs[i].v2 ,
                     screen_coord3 = pipeline * *trigs[i].v3 ;
-            Triangle(&screen_coord1, &screen_coord2, &screen_coord3).draw(*img, trigTextures[i], textureImg, normal_map, zBuffer, normalTrigs[i], sun );
+
+            Triangle(&screen_coord1, &screen_coord2, &screen_coord3).draw(*img, trigTextures[i], textureImg, normal_map, specular_map, zBuffer, normalTrigs[i], sun );
 
       }
 

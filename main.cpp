@@ -30,6 +30,10 @@ TGAImage* generate(const string &file_path){
     TGAImage nm;
     nm.read_tga_file(( file_path + "_nm.tga").c_str());
     nm.flip_vertically();
-    return v.generateImage(1000, 1000, texture, nm);
+    TGAImage spec;
+    spec.read_tga_file((file_path + "_spec.tga").c_str());
+    spec.flip_vertically();
+
+    return v.generateImage(800, 1000, texture, nm, spec);
 
 }
