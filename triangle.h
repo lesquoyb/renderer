@@ -62,44 +62,45 @@ public:
             for( int x = xMin; x <= xMax ; x++ ){
                 for( int y = yMin; y <= yMax ; y++ ){
 
-                    Vertex center = barycentre(x, y);
+                    Vertex bary = barycentre(x, y);
 
-                    if(center.x >= 0 and center.y >= 0 and center.z >= 0){
+                    if(bary.x >= 0 and bary.y >= 0 and bary.z >= 0){
 
-                        float z_interpolation =   v1->z * center.x
-                                                + v2->z * center.y
-                                                + v3->z * center.z;
+                        float z_interpolation =   v1->z * bary.x
+                                                + v2->z * bary.y
+                                                + v3->z * bary.z;
 
                         if(zBuffer[x][y] < z_interpolation){
 
-                            double vx =    texture.v1->x * center.x
-                                        +  texture.v2->x * center.y
-                                        +  texture.v3->x * center.z;
-                            double vy =    texture.v1->y * center.x
-                                        +  texture.v2->y * center.y
-                                        +  texture.v3->y * center.z;
+                            double vx =    texture.v1->x * bary.x
+                                        +  texture.v2->x * bary.y
+                                        +  texture.v3->x * bary.z;
+                            double vy =    texture.v1->y * bary.x
+                                        +  texture.v2->y * bary.y
+                                        +  texture.v3->y * bary.z;
+
+
+                            Vertex n_gouraud = (*normals.v1 * bary.x + *normals.v2 * bary.y + *normals.v3 * bary.z).normalized() * light_source;
+                            float gouraud_light = max( n_gouraud.x  + n_gouraud.y + n_gouraud.z , 0.f);
 
                             TGAColor texture_color = textureImg.get( vx * textureImg.get_width(), vy * textureImg.get_height() );
+
                             TGAColor normal_color  = normal_map.get( vx * normal_map.get_width(), vy * normal_map.get_height() );
-
                             Vertex n_map = Vertex( normal_color.b, normal_color.r, normal_color.g ).normalized();
-                            Vertex n_gouraud = (*normals.v1 * center.x + *normals.v2 * center.y + *normals.v3 * center.z).normalized();
-                            Vertex r =  ( n_map * 2 * (n_map.cross(light_source)) - light_source).normalized();
 
-                            Vertex n_spe(0, 0, 0);
-//TODO: ambient_light = gouraud shading ?
-                            float ambient_light =0;// n_gouraud.x * light_source.x + n_gouraud.y * light_source.y + n_gouraud.z * light_source.z;
-                            float n_light       =     n_map.x * light_source.x +     n_map.y * light_source.y +     n_map.z * light_source.z;
-                            float specular_light= pow( max(r.z, 0.0f), specular_map.get(vx,vy).r);
+                            Vertex reflected = ( n_map * 2 * (n_map * light_source) - light_source).normalized();
+
+                            float diffuse_light  = max( n_map.x * light_source.x +     n_map.y * light_source.y +     n_map.z * light_source.z, 0.f);
+                            float specular_light = max( pow( max(reflected.z, 0.0f), specular_map.get(vx,vy).r), 0.);
+                            float ambient_light  = 10;
 
 
+                            float light = diffuse_light + specular_light;
 
-                            float light = ambient_light + n_light + specular_light;
-
-                            TGAColor tColor(max(  min( (int) (texture_color.r * light), 255), 0),
-                                            max(  min( (int) (texture_color.g * light), 255), 0),
-                                            max(  min( (int) (texture_color.b * light), 255), 0),
-                                                              texture_color.a);
+                            TGAColor tColor(min( (int) ( ambient_light + texture_color.r * light), 255),
+                                            min( (int) ( ambient_light + texture_color.g * light), 255),
+                                            min( (int) ( ambient_light + texture_color.b * light), 255),
+                                            texture_color.a);
                             img.set(x, y, tColor);
                             zBuffer[x][y] = z_interpolation;
                         }

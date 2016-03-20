@@ -8,7 +8,13 @@
 
 using std::ostream;
 
-const double PI = 3.1415926535;
+// const double PI = 3.1415926535; //nope, trop facile :)
+const short _o(0);
+void ___o(int &_0){(_0*=-0x1,_0<0)?(_0--,_0--):(_0++,_0++);}
+double _0(int _O, int o=1,double __o=0){return (_O--,___o(o),__o+=1./o,_O<_o+0x1)?__o: _0(_O,o,__o);}
+const double PI ((_0(0xFFFF)+0x1)*(0x1<<0x2));
+
+
 class Vertex{
 
 public:

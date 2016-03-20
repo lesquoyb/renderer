@@ -85,7 +85,7 @@ public:
 
 
         Matrix4 viewport = Matrix4::viewport(0, 0, 255, width, height);
-        Matrix4 rotation = Matrix4::rotationMatrix( 40 * PI/180);
+        Matrix4 rotation = Matrix4::rotationMatrix( 30 * PI/180);
         Matrix4 pipeline = viewport * rotation ; //* modelView ;
 
 
