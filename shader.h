@@ -98,8 +98,8 @@ public:
     virtual bool fragment(const Vertex &bary,TGAColor &c){
 
         TGAColor normal_color  = normal_map.get( x * normal_map.get_width(), y * normal_map.get_height() );
-        Vertex n_map = (projM * ( Vertex( normal_color.b, normal_color.r, normal_color.g) )).normalized();
-        Vertex l = (projMTI * light_source).normalized();
+        Vertex n_map = (projMTI * ( Vertex( normal_color.b, normal_color.r, normal_color.g) )).normalized();
+        Vertex l = (projM * light_source).normalized();
         Vertex reflected =  (n_map*l*2 - l).normalized();
 
         float diffuse_light  = max( n_map.x * l.x +     n_map.y * l.y +     n_map.z * l.z, 0.f);
@@ -123,6 +123,90 @@ public:
 };
 
 
+class BlueLight : public Shader{
+
+
+    TGAImage normal_map;
+    Matrix4 projM;
+    Matrix4 projMTI;
+public:
+
+
+    BlueLight(const Matrix4& world, const Matrix4 &viewport, const Matrix4 &projection, const TGAImage&normal_map, const Vertex& light_source):
+        Shader(world, viewport, projection, light_source),
+        normal_map(normal_map)
+        {
+            updatePipeline();
+        }
+
+
+        virtual void updatePipeline(){
+            Shader::updatePipeline();
+            projM = projection * modelView;
+            projMTI = projM.invert_transpose();
+        }
+
+
+    double x, y;
+    virtual bool fragment(const Vertex &bary, TGAColor &c){
+
+        TGAColor normal_color  = normal_map.get( x * normal_map.get_width(), y * normal_map.get_height() );
+        Vertex n_map = (projMTI * Vertex( normal_color.b, normal_color.r, normal_color.g)).normalized();
+        Vertex l = (projM * light_source).normalized();
+        float light = max( n_map.x * l.x +     n_map.y * l.y +  n_map.z * l.z, 0.f);
+
+        c = TGAColor (min( (int) ( c.r), 255),
+                      min( (int) ( c.g ), 255),
+                      min( (int) ( c.b  + 200* light ), 255),
+                      c.a);
+        return false;
+    }
+
+};
+
+
+
+class RedLight : public Shader{
+
+
+    TGAImage normal_map;
+    Matrix4 projM;
+    Matrix4 projMTI;
+public:
+
+
+    RedLight(const Matrix4& world, const Matrix4 &viewport, const Matrix4 &projection, const TGAImage&normal_map, const Vertex& light_source):
+        Shader(world, viewport, projection, light_source),
+        normal_map(normal_map)
+        {
+            updatePipeline();
+        }
+
+
+        virtual void updatePipeline(){
+            Shader::updatePipeline();
+            projM = projection * modelView;
+            projMTI = projM.invert_transpose();
+        }
+
+
+    double x, y;
+    virtual bool fragment(const Vertex &bary, TGAColor &c){
+
+        TGAColor normal_color  = normal_map.get( x * normal_map.get_width(), y * normal_map.get_height() );
+        Vertex n_map = (projMTI * Vertex( normal_color.b, normal_color.r, normal_color.g)).normalized();
+        Vertex l = (projM * light_source).normalized();
+        float light = max( n_map.x * l.x +     n_map.y * l.y +  n_map.z * l.z, 0.f);
+
+        c = TGAColor (min( (int) ( c.r + 200* light), 255),
+                      min( (int) ( c.g ), 255),
+                      min( (int) ( c.b ), 255),
+                      c.a);
+        return false;
+    }
+
+};
+
 class Metal : public RealisticShader{
 
 
@@ -145,12 +229,13 @@ public:
         TGAColor normal_color  = normal_map.get( x * normal_map.get_width(), y * normal_map.get_height() );
         Vertex n_map = (projMTI * ( Vertex( normal_color.b, normal_color.r, normal_color.g) )).normalized();
         Vertex l = (projM * light_source).normalized();
-        Vertex reflected =  (n_map*l*2 - l).normalized();
+        Vertex reflected =  (n_map * l*2 - l).normalized();
+
 
         float diffuse_light  = max( n_map.x * l.x +     n_map.y * l.y +     n_map.z * l.z, 0.f);
-        auto col = 50;
+        auto col = specular_map.get(x * specular_map.get_width(), y * specular_map.get_height()).b;
 
-        float specular_light = max( pow( max(reflected.z, 0.0f), 10+col), 0.);
+        float specular_light = max( pow( max(reflected.z, 0.0f), 10), 0.);
 
         float ambient_light  = 2;//5;
 

@@ -80,25 +80,32 @@ public:
         Vertex center(0,0,0);
         Vertex up(0,1,0);
         Matrix4 modelView  = Matrix4::Matrix4::lookat(eye, center, up);//TODO: pas bien il faut décomposer view et model
-        Matrix4 projection = Matrix4::rotationMatrix( 45 * PI/180);
+        Matrix4 projection = Matrix4::rotationMatrix( 1 * PI/180);
 
         Matrix4 viewport = Matrix4::viewport(width/8, height/8, 255, width*0.8, height*0.8);
 
 
+        Vertex redLight(0,1,0);
+        Vertex blueLight(1,0,0);
+
         RealisticShader real(viewport, projection, modelView, light_source, normal_map, specular_map);
         Metal metal(viewport, projection, modelView, light_source, normal_map);
         Gouraud gouraud(viewport,projection, modelView, normalTrigs[0], light_source);
+
+        BlueLight blue(viewport,projection, modelView, normal_map, blueLight);
         Cartoon cartoon(viewport, projection, modelView, normalTrigs[0], light_source);
+        RedLight red(viewport,projection, modelView, normal_map, redLight);
         vector<Shader*> shaderList;
-     //   shaderList.push_back(new Contour(viewport,projection, modelView));
-        //shaderList.push_back(&gouraud);
-        shaderList.push_back(&real);
+      //shaderList.push_back(new Contour(viewport,projection, modelView));
+     //   shaderList.push_back(&gouraud);
+           shaderList.push_back(&red);
+           shaderList.push_back(&blue);
+        //shaderList.push_back(&real);
        //   shaderList.push_back(&metal);
      //   shaderList.push_back(new BlackAndWhite(viewport, projection, modelView));
-     //   shaderList.push_back(&cartoon);
-      //  shaderList.push_back(new DominantColor(viewport, projection, modelView));
+       // shaderList.push_back(&cartoon);
+        //shaderList.push_back(new DominantColor(viewport, projection, modelView));
 
-        bool voxel = true;
         for(int i = 0 ; i < trigs.size() ; i++){
 
             gouraud.normals = normalTrigs[i];
@@ -135,7 +142,15 @@ public:
                                             +  trigTextures[i].v3->y * bary.z;
                                 real.x = vx;
                                 real.y = vy;
-                                TGAColor color = textureImg.get(vx * textureImg.get_width(),vy * textureImg.get_height());
+                                metal.x = vx;
+                                metal.y = vy;
+
+                                red.x = vx;
+                                red.y = vy;
+                                blue.x = vx;
+                                blue.y = vy;
+
+                                TGAColor color (0,0,0, 0);//textureImg.get(vx * textureImg.get_width(),vy * textureImg.get_height());
                                 bool draw = false;
                                 for(int i = 0 ; i < shaderList.size() ;i++){
                                     if(!shaderList[i]->fragment(bary, color)){
