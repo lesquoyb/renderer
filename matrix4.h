@@ -327,6 +327,7 @@ public:
         m[0][0] = w/2.f;
         m[1][1] = h/2.f;
         m[2][2] = depth/2.f;
+
         return m;
     }
 
@@ -340,7 +341,7 @@ public:
     }
 
 
-    static Matrix4 rotationMatrix(const double &alpha, const Axis &axis = Y){//, const Axis& axis = Axis::X){
+    static Matrix4 rotationMatrix(const double &alpha, const Axis &axis = Y){//flemme de faire les autres en fait
 
         Matrix4 m = identity();
         m[0][0] =  cos(alpha);

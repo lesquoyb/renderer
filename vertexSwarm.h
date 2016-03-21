@@ -75,29 +75,30 @@ public:
             }
         }
 
-        Vertex light_source(0, 0, 1);
+        Vertex light_source(0, 1, 1);
         Vertex eye(0,0,1);
         Vertex center(0,0,0);
         Vertex up(0,1,0);
-        Matrix4 modelView  = Matrix4::lookat(eye, center, up);//TODO: pas bien il faut décomposer view et model
-        Matrix4 projection = Matrix4::rotationMatrix( 1 * PI/180);
+        Matrix4 modelView  = Matrix4::Matrix4::lookat(eye, center, up);//TODO: pas bien il faut décomposer view et model
+        Matrix4 projection = Matrix4::rotationMatrix( 45 * PI/180);
 
         Matrix4 viewport = Matrix4::viewport(width/8, height/8, 255, width*0.8, height*0.8);
 
 
         RealisticShader real(viewport, projection, modelView, light_source, normal_map, specular_map);
+        Metal metal(viewport, projection, modelView, light_source, normal_map);
         Gouraud gouraud(viewport,projection, modelView, normalTrigs[0], light_source);
         Cartoon cartoon(viewport, projection, modelView, normalTrigs[0], light_source);
         vector<Shader*> shaderList;
      //   shaderList.push_back(new Contour(viewport,projection, modelView));
-      //  shaderList.push_back(&gouraud);
-     //   shaderList.push_back(&real);
+        //shaderList.push_back(&gouraud);
+        shaderList.push_back(&real);
+       //   shaderList.push_back(&metal);
      //   shaderList.push_back(new BlackAndWhite(viewport, projection, modelView));
-        shaderList.push_back(&cartoon);
-        shaderList.push_back(new DominantColor(viewport, projection, modelView));
+     //   shaderList.push_back(&cartoon);
+      //  shaderList.push_back(new DominantColor(viewport, projection, modelView));
 
-
-
+        bool voxel = true;
         for(int i = 0 ; i < trigs.size() ; i++){
 
             gouraud.normals = normalTrigs[i];
@@ -111,7 +112,7 @@ public:
             int xMax = max(max(v1.x, v2.x), v3.x);
             int yMax = max(max(v1.y, v2.y), v3.y);
 
-            if( xMin >= 0 and yMin >= 0 and xMax <= textureImg.get_width() and yMax <= textureImg.get_height() ){//si tout le triangle est dans l'image, sinon flemme de faire un découpage propre
+            if (( xMin >= 0 and yMin >= 0 and xMax <= textureImg.get_width() and yMax <= textureImg.get_height() )){//si tout le triangle est dans l'image, sinon flemme de faire un découpage propre
 
                 for( int x = xMin; x <= xMax ; x++ ){
                     for( int y = yMin; y <= yMax ; y++ ){

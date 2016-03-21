@@ -14,7 +14,7 @@ TGAImage* generate(const string &file_path);
 
 int main(int argc, char *argv[]){
 
-    TGAImage* img = generate(afr_h);
+    TGAImage* img = generate(diablo);
     if(img->write_tga_file("output.tga"))
         return 0;
     return 0;

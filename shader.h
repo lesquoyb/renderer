@@ -98,21 +98,19 @@ public:
     virtual bool fragment(const Vertex &bary,TGAColor &c){
 
         TGAColor normal_color  = normal_map.get( x * normal_map.get_width(), y * normal_map.get_height() );
-        Vertex n_map = (projMTI * ( Vertex( normal_color.b, normal_color.r, normal_color.g) )).normalized();
-        Vertex l = (projM * light_source).normalized();
-        Vertex reflected =  (n_map*n_map*l*2 - l).normalized();
-       // reflected.z = max(reflected.z, 0.f);
-        float diffuse_light  = max( n_map.x * l.x +     n_map.y * l.y +     n_map.z * l.z, 0.f);
-        auto col = specular_map.get(bary.x * specular_map.get_width(),bary.y * specular_map.get_height()).b;
-   //     cout << (int)col.r <<" " << (int)col.g << " " << (int)col.b <<endl;
-        //cout << reflected <<endl;
-        float specular_light = max( pow( max(reflected.z, 0.0f), col), 0.);
+        Vertex n_map = (projM * ( Vertex( normal_color.b, normal_color.r, normal_color.g) )).normalized();
+        Vertex l = (projMTI * light_source).normalized();
+        Vertex reflected =  (n_map*l*2 - l).normalized();
 
-        float ambient_light  = 5;
+        float diffuse_light  = max( n_map.x * l.x +     n_map.y * l.y +     n_map.z * l.z, 0.f);
+        auto col = specular_map.get(x * specular_map.get_width(), y * specular_map.get_height()).b;
+
+        float specular_light = max( pow( max(reflected.z, 0.0f), 10+col), 0.);
+
+        float ambient_light  = 2;//5;
 
 
         float light = diffuse_light + specular_light;
-        //cout << light <<endl;
 
         c = TGAColor (  min( (int) ( ambient_light + c.r * light), 255),
                         min( (int) ( ambient_light + c.g * light), 255),
@@ -122,6 +120,49 @@ public:
     }
 
 
+};
+
+
+class Metal : public RealisticShader{
+
+
+public:
+
+    TGAImage normal_map;
+    TGAImage specular_map;
+    Matrix4 projM;
+    Matrix4 projMTI;
+
+    Metal(const Matrix4 &viewport, const Matrix4 &projection, Matrix4& modelView, const Vertex& light_source, const TGAImage &normal_map):
+        RealisticShader(viewport, projection, modelView, light_source, normal_map, TGAImage())
+    {
+        updatePipeline();
+    }
+
+
+    virtual bool fragment(const Vertex &bary,TGAColor &c){
+
+        TGAColor normal_color  = normal_map.get( x * normal_map.get_width(), y * normal_map.get_height() );
+        Vertex n_map = (projMTI * ( Vertex( normal_color.b, normal_color.r, normal_color.g) )).normalized();
+        Vertex l = (projM * light_source).normalized();
+        Vertex reflected =  (n_map*l*2 - l).normalized();
+
+        float diffuse_light  = max( n_map.x * l.x +     n_map.y * l.y +     n_map.z * l.z, 0.f);
+        auto col = 50;
+
+        float specular_light = max( pow( max(reflected.z, 0.0f), 10+col), 0.);
+
+        float ambient_light  = 2;//5;
+
+
+        float light = diffuse_light + specular_light;
+
+        c = TGAColor (  min( (int) ( ambient_light + c.r * light), 255),
+                        min( (int) ( ambient_light + c.g * light), 255),
+                        min( (int) ( ambient_light + c.b * light), 255),
+                        c.a);
+        return false;
+    }
 };
 
 
