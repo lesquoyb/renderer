@@ -6,6 +6,7 @@
 #include "triangle.h"
 #include "tgaimage.h"
 #include "matrix4.h"
+#include "shader.h"
 
 
 class VertexSwarm{
@@ -66,37 +67,89 @@ public:
 
         TGAImage* img = new TGAImage(width,height,TGAImage::RGB);
 
-        int realW = (width - wOffset)/2,
-            realH = (height - hOffset)/2;
         float**  zBuffer = (float**) malloc(width * sizeof(float*));
         for(int i = 0 ; i < width; i++){
             zBuffer[i] = (float*) malloc(height * sizeof(float) );
             for(int j = 0 ; j < height ; j++){
-                zBuffer[i][j] = -9999; //TODO: YOLOOO
+                zBuffer[i][j] = -9999;
             }
         }
 
-        Vertex sun(0, 0, 1);
+        Vertex light_source(0, 0, 1);
         Vertex eye(0,0,1);
         Vertex center(0,0,0);
-        Matrix4 modelView  = Matrix4::identity();//Matrix4::lookat(eye, center, Vertex(0,1,0));//TODO: pas bien il faut décomposer view et model
-        Matrix4 projection = Matrix4::identity();
-        projection[3][2] = -1.f/(eye-center).norm();
+        Vertex up(0,1,0);
+        Matrix4 modelView  = Matrix4::lookat(eye, center, up);//TODO: pas bien il faut décomposer view et model
+        Matrix4 projection = Matrix4::rotationMatrix( 1 * PI/180);
+
+        Matrix4 viewport = Matrix4::viewport(width/8, height/8, 255, width*0.8, height*0.8);
 
 
-        Matrix4 viewport = Matrix4::viewport(0, 0, 255, width, height);
-        Matrix4 rotation = Matrix4::rotationMatrix( 30 * PI/180);
-        Matrix4 pipeline = viewport * rotation ; //* modelView ;
+        RealisticShader real(viewport, projection, modelView, light_source, normal_map, specular_map);
+        Gouraud gouraud(viewport,projection, modelView, normalTrigs[0], light_source);
+        Cartoon cartoon(viewport, projection, modelView, normalTrigs[0], light_source);
+        vector<Shader*> shaderList;
+     //   shaderList.push_back(new Contour(viewport,projection, modelView));
+      //  shaderList.push_back(&gouraud);
+     //   shaderList.push_back(&real);
+     //   shaderList.push_back(new BlackAndWhite(viewport, projection, modelView));
+        shaderList.push_back(&cartoon);
+        shaderList.push_back(new DominantColor(viewport, projection, modelView));
+
 
 
         for(int i = 0 ; i < trigs.size() ; i++){
 
-            Vertex  screen_coord1 = pipeline * *trigs[i].v1 ,
-                    screen_coord2 = pipeline * *trigs[i].v2 ,
-                    screen_coord3 = pipeline * *trigs[i].v3 ;
+            gouraud.normals = normalTrigs[i];
+            cartoon.normals = normalTrigs[i];
+            Vertex  v1 = gouraud.vertex(*trigs[i].v1),
+                    v2 = gouraud.vertex(*trigs[i].v2),
+                    v3 = gouraud.vertex(*trigs[i].v3);
+            //get the bounding box
+            int xMin = min(min(v1.x, v2.x), v3.x);
+            int yMin = min(min(v1.y, v2.y), v3.y);
+            int xMax = max(max(v1.x, v2.x), v3.x);
+            int yMax = max(max(v1.y, v2.y), v3.y);
 
-            Triangle(&screen_coord1, &screen_coord2, &screen_coord3).draw(*img, trigTextures[i], textureImg, normal_map, specular_map, zBuffer, normalTrigs[i], sun );
+            if( xMin >= 0 and yMin >= 0 and xMax <= textureImg.get_width() and yMax <= textureImg.get_height() ){//si tout le triangle est dans l'image, sinon flemme de faire un découpage propre
 
+                for( int x = xMin; x <= xMax ; x++ ){
+                    for( int y = yMin; y <= yMax ; y++ ){
+
+                        Vertex bary = barycentre(v1, v2, v3, x, y);
+
+                        if(bary.x >= 0 and bary.y >= 0 and bary.z >= 0){
+
+                            float z_interpolation =   v1.z * bary.x
+                                                    + v2.z * bary.y
+                                                    + v3.z * bary.z;
+
+                            if(zBuffer[x][y] < z_interpolation){
+
+                                double vx =    trigTextures[i].v1->x * bary.x
+                                            +  trigTextures[i].v2->x * bary.y
+                                            +  trigTextures[i].v3->x * bary.z;
+                                double vy =    trigTextures[i].v1->y * bary.x
+                                            +  trigTextures[i].v2->y * bary.y
+                                            +  trigTextures[i].v3->y * bary.z;
+                                real.x = vx;
+                                real.y = vy;
+                                TGAColor color = textureImg.get(vx * textureImg.get_width(),vy * textureImg.get_height());
+                                bool draw = false;
+                                for(int i = 0 ; i < shaderList.size() ;i++){
+                                    if(!shaderList[i]->fragment(bary, color)){
+                                        draw = true;
+                                    }
+                                }
+                                if(draw){
+                                    img->set(x, y, color);
+                                    zBuffer[x][y] = z_interpolation;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
       }
 
 

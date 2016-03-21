@@ -13,4 +13,5 @@ HEADERS += \
     triangle.h \
     vertex.h \
     vertexSwarm.h \
-    matrix4.h
+    matrix4.h \
+    shader.h
